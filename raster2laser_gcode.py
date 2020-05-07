@@ -37,6 +37,8 @@ import inkex
 import png
 import array
 
+# import tracemalloc
+# tracemalloc.start()
 
 class GcodeExport(inkex.Effect):
 
@@ -44,41 +46,41 @@ class GcodeExport(inkex.Effect):
 	def __init__(self):
 		"""init the effetc library and get options from gui"""
 		inkex.Effect.__init__(self)
-		
+
 		# Opzioni di esportazione dell'immagine
-		self.OptionParser.add_option("-d", "--directory",action="store", type="string", dest="directory", default="/home/",help="Directory for files") ####check_dir
-		self.OptionParser.add_option("-f", "--filename", action="store", type="string", dest="filename", default="-1.0", help="File name")            
-		self.OptionParser.add_option("","--add-numeric-suffix-to-filename", action="store", type="inkbool", dest="add_numeric_suffix_to_filename", default=True,help="Add numeric suffix to filename")            
-		self.OptionParser.add_option("","--bg_color",action="store",type="string",dest="bg_color",default="",help="")
-		self.OptionParser.add_option("","--resolution",action="store", type="int", dest="resolution", default="5",help="") #Usare il valore su float(xy)/resolution e un case per i DPI dell export
+		self.arg_parser.add_argument("-d", "--directory", type=str, dest="directory", default="/home/", help="Directory for files") ####check_dir
+		self.arg_parser.add_argument("-file", "--filename", type=str, dest="filename", default="-1.0", help="File name")            
+		self.arg_parser.add_argument("-n", "--add-numeric-suffix-to-filename", type=inkex.utils.Boolean, dest="add_numeric_suffix_to_filename", default=True, help="Add numeric suffix to filename")            
+		self.arg_parser.add_argument("-b", "--bg_color",type=str,dest="bg_color",default="",help="")
+		self.arg_parser.add_argument("-r", "--resolution", type=int, dest="resolution", default="5",help="") #Usare il valore su float(xy)/resolution e un case per i DPI dell export
 		
 		
 		# Come convertire in scala di grigi
-		self.OptionParser.add_option("","--grayscale_type",action="store", type="int", dest="grayscale_type", default="1",help="") 
+		self.arg_parser.add_argument("-g", "--grayscale_type", type=int, dest="grayscale_type", default="1",help="") 
 		
 		# Modalita di conversione in Bianco e Nero 
-		self.OptionParser.add_option("","--conversion_type",action="store", type="int", dest="conversion_type", default="1",help="") 
+		self.arg_parser.add_argument("-c", "--conversion_type", type=int, dest="conversion_type", default="1",help="") 
 		
 		# Opzioni modalita 
-		self.OptionParser.add_option("","--BW_threshold",action="store", type="int", dest="BW_threshold", default="128",help="") 
-		self.OptionParser.add_option("","--grayscale_resolution",action="store", type="int", dest="grayscale_resolution", default="1",help="") 
+		self.arg_parser.add_argument("-BW", "--BW_threshold", type=int, dest="BW_threshold", default="128",help="") 
+		self.arg_parser.add_argument("-GS", "--grayscale_resolution", type=int, dest="grayscale_resolution", default="1",help="") 
 		
 		#Velocita Nero e spostamento
-		self.OptionParser.add_option("","--speed_ON",action="store", type="int", dest="speed_ON", default="200",help="") 
+		self.arg_parser.add_argument("-s", "--speed_ON", type=int, dest="speed_ON", default="200",help="") 
 
 		# Mirror Y
-		self.OptionParser.add_option("","--flip_y",action="store", type="inkbool", dest="flip_y", default=False,help="")
+		self.arg_parser.add_argument("-f", "--flip_y", type=inkex.utils.Boolean, dest="flip_y", default=False,help="")
 		
 		# Homing
-		self.OptionParser.add_option("","--homing",action="store", type="int", dest="homing", default="1",help="")
+		self.arg_parser.add_argument("-home", "--homing", type=int, dest="homing", default="1",help="")
 
 		# Commands
-		self.OptionParser.add_option("","--laseron", action="store", type="string", dest="laseron", default="M03", help="")
-		self.OptionParser.add_option("","--laseroff", action="store", type="string", dest="laseroff", default="M05", help="")
+		self.arg_parser.add_argument("-lon", "--laseron", type=str, dest="laseron", default="M03", help="")
+		self.arg_parser.add_argument("-loff", "--laseroff", type=str, dest="laseroff", default="M05", help="")
 		
 		
 		# Anteprima = Solo immagine BN 
-		self.OptionParser.add_option("","--preview_only",action="store", type="inkbool", dest="preview_only", default=False,help="") 
+		self.arg_parser.add_argument("-preview", "--preview_only", type=inkex.utils.Boolean, dest="preview_only", default=False,help="") 
 
 		#inkex.errormsg("BLA BLA BLA Messaggio da visualizzare") #DEBUG
 
@@ -90,7 +92,7 @@ class GcodeExport(inkex.Effect):
 	def effect(self):
 		
 
-		current_file = self.args[-1]
+		current_file = self.options.input_file
 		bg_color = self.options.bg_color
 		
 		
@@ -109,7 +111,7 @@ class GcodeExport(inkex.Effect):
 				max_n = 0
 				for s in dir_list :
 					r = re.match(r"^%s_0*(\d+)%s$"%(re.escape(temp_name),'.png' ), s)
-					if r :
+					if r:
 						max_n = max(max_n,int(r.group(1)))	
 				self.options.filename = temp_name + "_" + ( "0"*(4-len(str(max_n+1))) + str(max_n+1) )
 
@@ -153,12 +155,12 @@ class GcodeExport(inkex.Effect):
 			self.exportPage(pos_file_png_exported,current_file,bg_color)
 
 
-			
+
 			#DA FARE
 			#Manipolo l'immagine PNG per generare il file Gcode
 			self.PNGtoGcode(pos_file_png_exported,pos_file_png_BW,pos_file_gcode)
-						
-			
+
+
 		else:
 			inkex.errormsg("Directory does not exist! Please specify existing directory!")
             
@@ -175,20 +177,20 @@ class GcodeExport(inkex.Effect):
 		###command="inkscape -C -e \"%s\" -b\"%s\" %s -d 127" % (pos_file_png_exported,bg_color,current_file) 
 
 		if self.options.resolution == 1:
-			DPI = 25.4
+			DPI = 25
 		elif self.options.resolution == 2:
-			DPI = 50.8
+			DPI = 50
 		elif self.options.resolution == 5:
 			DPI = 127
 		else:
 			DPI = 254
 
-		command="inkscape -C -e \"%s\" -b\"%s\" %s -d %s" % (pos_file_png_exported,bg_color,current_file,DPI) #Comando da linea di comando per esportare in PNG
-					
-		p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		command="inkscape -C -o \"%s\" -b %s %s -d %s 2>/dev/null" % (pos_file_png_exported,bg_color[1:-1],current_file,DPI) #Comando da linea di comando per esportare in PNG
+	
+		p = subprocess.Popen(command, shell=True)
 		return_code = p.wait()
-		f = p.stdout
-		err = p.stderr
+		# f = p.stdout
+		# err = p.stderr
 
 
 ########	CREA IMMAGINE IN B/N E POI GENERA GCODE
@@ -304,8 +306,8 @@ class GcodeExport(inkex.Effect):
 			Step3 = [[B,B,N,B,B],[B,N,N,N,B],[N,N,N,N,N],[B,N,N,N,B],[B,B,N,B,B]]
 			Step4 = [[B,N,N,N,B],[N,N,N,N,N],[N,N,N,N,N],[N,N,N,N,N],[B,N,N,N,B]]
 			
-			for y in range(h/5): 
-				for x in range(w/5): 
+			for y in range(int(int(h)/5)): 
+				for x in range(int(int(w)/5)): 
 					media = 0
 					for y2 in range(5):
 						for x2 in range(5):
@@ -556,7 +558,7 @@ class GcodeExport(inkex.Effect):
 
 def _main():
 	e=GcodeExport()
-	e.affect()
+	e.run()
 	
 	exit()
 
