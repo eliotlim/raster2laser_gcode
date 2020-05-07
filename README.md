@@ -1,3 +1,10 @@
+# IMPORTANT! - Tweaked to work with Inkscape 1.x
+
+- Original work by 305engineering
+- Minor changes to make it work with inkscape 1.x
+
+
+
 # Various Inkscape extensions
 
  - Raster 2 Laser GCode generator
