@@ -2,6 +2,9 @@
 
 - Original work by 305engineering
 - Minor changes to make it work with inkscape 1.x
+- I have not changed/touched the original logic behind 
+
+
 
 
 
