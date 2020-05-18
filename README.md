@@ -6,6 +6,7 @@
 - No more option to pick background color (always white, which translates to a simple move - laser off)
 - New file names
 - New svg -> png conversion 
+- Remove Preview Only
 
 # Raster 2 Laser GCode generator
 

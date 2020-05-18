@@ -76,9 +76,6 @@ class GcodeExport(inkex.Effect):
         self.arg_parser.add_argument("-lon", "--laseron", type=str, dest="laseron", default="M03", help="")
         self.arg_parser.add_argument("-loff", "--laseroff", type=str, dest="laseroff", default="M05", help="")
 
-        # Anteprima = Solo immagine BN
-        self.arg_parser.add_argument("-preview", "--preview_only", type=inkex.utils.Boolean, dest="preview_only", default=False, help="")
-
         #inkex.errormsg("BLA BLA BLA Messaggio da visualizzare") #DEBUG
 
     ######## 	Richiamata da __init__()
@@ -376,140 +373,138 @@ class GcodeExport(inkex.Effect):
 
 
         #### GENERO IL FILE GCODE ####
-        if not self.options.preview_only: #Genero Gcode solo se devo
+        if not self.options.flip_y: #Inverto asse Y solo se flip_y = False
+            #-> coordinate Cartesiane (False) Coordinate "informatiche" (True)
+            matrice_BN.reverse()
 
-            if not self.options.flip_y: #Inverto asse Y solo se flip_y = False
-                #-> coordinate Cartesiane (False) Coordinate "informatiche" (True)
-                matrice_BN.reverse()
+        Laser_ON = False
+        Feed = self.options.speed_ON
+        Scala = self.options.resolution
+        file_gcode = open(pos_file_gcode, 'w')  #Creo il file
 
-            Laser_ON = False
-            Feed = self.options.speed_ON
-            Scala = self.options.resolution
-            file_gcode = open(pos_file_gcode, 'w')  #Creo il file
+        #Configurazioni iniziali standard Gcode
+        file_gcode.write('; Generated with:\n; "Raster 2 Laser Gcode generator"\n; by 305 Engineering\n;\n; Inkscape 1.x mod by +BFerrarese\n;\n')
+        #HOMING
+        if self.options.homing == 1:
+            file_gcode.write('G28; home all axes\n')
+        elif self.options.homing == 2:
+            file_gcode.write('$H; home all axes\n')
+        else:
+            pass
+        file_gcode.write('G21; Set units to millimeters\n')
+        file_gcode.write('G90; Use absolute coordinates\n')
+        file_gcode.write('G92; Coordinate Offset\n')
 
-            #Configurazioni iniziali standard Gcode
-            file_gcode.write('; Generated with:\n; "Raster 2 Laser Gcode generator"\n; by 305 Engineering\n;\n; Inkscape 1.x mod by +BFerrarese\n;\n')
-            #HOMING
-            if self.options.homing == 1:
-                file_gcode.write('G28; home all axes\n')
-            elif self.options.homing == 2:
-                file_gcode.write('$H; home all axes\n')
-            else:
-                pass
-            file_gcode.write('G21; Set units to millimeters\n')
-            file_gcode.write('G90; Use absolute coordinates\n')
-            file_gcode.write('G92; Coordinate Offset\n')
+        #Creazione del Gcode
 
-            #Creazione del Gcode
+        #allargo la matrice per lavorare su tutta l'immagine
+        for y in range(h):
+            matrice_BN[y].append(B)
+        w = w+1
 
-            #allargo la matrice per lavorare su tutta l'immagine
+        if self.options.conversion_type != 6:
             for y in range(h):
-                matrice_BN[y].append(B)
-            w = w+1
-
-            if self.options.conversion_type != 6:
-                for y in range(h):
-                    if y % 2 == 0:
-                        for x in range(w):
-                            if matrice_BN[y][x] == N:
-                                if not Laser_ON:
-                                    #file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(F_G00) + '\n')
-                                    file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
-                                    file_gcode.write(self.options.laseron + '\n')
-                                    Laser_ON = True
-                                if  Laser_ON:   #DEVO evitare di uscire dalla matrice
-                                    if x == w-1:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                if y % 2 == 0:
+                    for x in range(w):
+                        if matrice_BN[y][x] == N:
+                            if not Laser_ON:
+                                #file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(F_G00) + '\n')
+                                file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
+                                file_gcode.write(self.options.laseron + '\n')
+                                Laser_ON = True
+                            if  Laser_ON:   #DEVO evitare di uscire dalla matrice
+                                if x == w-1:
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write(self.options.laseroff + '\n')
+                                    Laser_ON = False
+                                else:
+                                    if matrice_BN[y][x+1] != N:
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
-                                    else:
-                                        if matrice_BN[y][x+1] != N:
-                                            file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseroff + '\n')
-                                            Laser_ON = False
-                    else:
-                        for x in reversed(range(w)):
-                            if matrice_BN[y][x] == N:
-                                if not Laser_ON:
-                                    #file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(F_G00) + '\n')
-                                    file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
-                                    file_gcode.write(self.options.laseron + '\n')
-                                    Laser_ON = True
-                                if  Laser_ON:   #DEVO evitare di uscire dalla matrice
-                                    if x == 0:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
-                                        file_gcode.write(self.options.laseroff + '\n')
-                                        Laser_ON = False
-                                    else:
-                                        if matrice_BN[y][x-1] != N:
-                                            file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseroff + '\n')
-                                            Laser_ON = False
-
-            else: ##SCALA DI GRIGI
-                for y in range(h):
-                    if y % 2 == 0:
-                        for x in range(w):
-                            if matrice_BN[y][x] != B:
-                                if not Laser_ON:
-                                    file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
-                                    file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x]) +'\n')
-                                    Laser_ON = True
-
-                                if  Laser_ON:   #DEVO evitare di uscire dalla matrice
-                                    if x == w-1: #controllo fine riga
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                else:
+                    for x in reversed(range(w)):
+                        if matrice_BN[y][x] == N:
+                            if not Laser_ON:
+                                #file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(F_G00) + '\n')
+                                file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
+                                file_gcode.write(self.options.laseron + '\n')
+                                Laser_ON = True
+                            if  Laser_ON:   #DEVO evitare di uscire dalla matrice
+                                if x == 0:
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write(self.options.laseroff + '\n')
+                                    Laser_ON = False
+                                else:
+                                    if matrice_BN[y][x-1] != N:
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
 
-                                    else:
-                                        if matrice_BN[y][x+1] == B:
-                                            file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseroff + '\n')
-                                            Laser_ON = False
+        else: ##SCALA DI GRIGI
+            for y in range(h):
+                if y % 2 == 0:
+                    for x in range(w):
+                        if matrice_BN[y][x] != B:
+                            if not Laser_ON:
+                                file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
+                                file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x]) +'\n')
+                                Laser_ON = True
 
-                                        elif matrice_BN[y][x] != matrice_BN[y][x+1]:
-                                            file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x+1]) +'\n')
+                            if  Laser_ON:   #DEVO evitare di uscire dalla matrice
+                                if x == w-1: #controllo fine riga
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write(self.options.laseroff + '\n')
+                                    Laser_ON = False
 
-
-                    else:
-                        for x in reversed(range(w)):
-                            if matrice_BN[y][x] != B:
-                                if not Laser_ON:
-                                    file_gcode.write('G0 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
-                                    file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x]) +'\n')
-                                    Laser_ON = True
-
-                                if  Laser_ON:   #DEVO evitare di uscire dalla matrice
-                                    if x == 0: #controllo fine riga ritorno
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                else:
+                                    if matrice_BN[y][x+1] == B:
+                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
 
-                                    else:
-                                        if matrice_BN[y][x-1] == B:
-                                            file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseroff + '\n')
-                                            Laser_ON = False
-
-                                        elif  matrice_BN[y][x] != matrice_BN[y][x-1]:
-                                            file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
-                                            file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x-1]) +'\n')
+                                    elif matrice_BN[y][x] != matrice_BN[y][x+1]:
+                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x+1]) +'\n')
 
 
+                else:
+                    for x in reversed(range(w)):
+                        if matrice_BN[y][x] != B:
+                            if not Laser_ON:
+                                file_gcode.write('G0 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
+                                file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x]) +'\n')
+                                Laser_ON = True
 
-            #Configurazioni finali standard Gcode
-            file_gcode.write('G0 X0 Y0; home\n')
-            #HOMING
-            if self.options.homing == 1:
-                file_gcode.write('G28; home all axes\n')
-            elif self.options.homing == 2:
-                file_gcode.write('$H; home all axes\n')
-            else:
-                pass
+                            if  Laser_ON:   #DEVO evitare di uscire dalla matrice
+                                if x == 0: #controllo fine riga ritorno
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write(self.options.laseroff + '\n')
+                                    Laser_ON = False
 
-            file_gcode.close() #Chiudo il file
+                                else:
+                                    if matrice_BN[y][x-1] == B:
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write(self.options.laseroff + '\n')
+                                        Laser_ON = False
+
+                                    elif  matrice_BN[y][x] != matrice_BN[y][x-1]:
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x-1]) +'\n')
+
+
+
+        #Configurazioni finali standard Gcode
+        file_gcode.write('G0 X0 Y0; home\n')
+        #HOMING
+        if self.options.homing == 1:
+            file_gcode.write('G28; home all axes\n')
+        elif self.options.homing == 2:
+            file_gcode.write('$H; home all axes\n')
+        else:
+            pass
+
+        file_gcode.close() #Chiudo il file
 
 
 
