@@ -7,12 +7,17 @@
 - New file names
 - New svg -> png conversion 
 - Remove Preview Only
+- Fix Feed rate (per min = *60)
+- Add feed rate to travel moves
+- Add power constant laser power (Sx) #TODO: variable power for grayscale
+- Consolidate Feed (=speed Fx) and Speed(=power Sx) to gcode header
 
-# Raster 2 Laser GCode generator
 
 
 ----------- ORIGINAL TEXT -----------------
 
+
+# Raster 2 Laser GCode generator
 
 ## Descriptions
 - Raster 2 Laser GCode generator is an extension to generate Gcode for a laser cutter/engraver (or pen plotter), it can generate various type of outputs from a simple B&W (on/off) to a more detailed Grayscale (pwm)

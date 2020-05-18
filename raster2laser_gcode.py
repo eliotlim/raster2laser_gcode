@@ -64,7 +64,8 @@ class GcodeExport(inkex.Effect):
         self.arg_parser.add_argument("-GS", "--grayscale_resolution", type=int, dest="grayscale_resolution", default="1", help="")
 
         #Velocita Nero e spostamento
-        self.arg_parser.add_argument("-s", "--speed_ON", type=int, dest="speed_ON", default="200", help="")
+        self.arg_parser.add_argument("-s", "--feed", type=int, dest="feed", default="200", help="")
+        self.arg_parser.add_argument("-p", "--power", type=int, dest="power", default="80", help="")
 
         # Mirror Y
         self.arg_parser.add_argument("-f", "--flip_y", type=inkex.utils.Boolean, dest="flip_y", default=False, help="")
@@ -378,7 +379,8 @@ class GcodeExport(inkex.Effect):
             matrice_BN.reverse()
 
         Laser_ON = False
-        Feed = self.options.speed_ON
+        Feed = self.options.feed * 60
+        Power = self.options.power
         Scala = self.options.resolution
         file_gcode = open(pos_file_gcode, 'w')  #Creo il file
 
@@ -392,8 +394,9 @@ class GcodeExport(inkex.Effect):
         else:
             pass
         file_gcode.write('G21; Set units to millimeters\n')
-        file_gcode.write('G90; Use absolute coordinates\n')
-        file_gcode.write('G92; Coordinate Offset\n')
+        file_gcode.write('G90; Use absolute coordinates\n\n')
+        file_gcode.write('G0' +' F' + str(Feed) + '\n')
+        file_gcode.write('G1' +' F' + str(Feed) + ' S' + str(Power) + '\n')
 
         #Creazione del Gcode
 
@@ -414,12 +417,12 @@ class GcodeExport(inkex.Effect):
                                 Laser_ON = True
                             if  Laser_ON:   #DEVO evitare di uscire dalla matrice
                                 if x == w-1:
-                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n')
                                     file_gcode.write(self.options.laseroff + '\n')
-                                    Laser_ON = False
+                                    # Laser_ON = False
                                 else:
                                     if matrice_BN[y][x+1] != N:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
                 else:
@@ -432,12 +435,12 @@ class GcodeExport(inkex.Effect):
                                 Laser_ON = True
                             if  Laser_ON:   #DEVO evitare di uscire dalla matrice
                                 if x == 0:
-                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n')
                                     file_gcode.write(self.options.laseroff + '\n')
                                     Laser_ON = False
                                 else:
                                     if matrice_BN[y][x-1] != N:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
 
@@ -453,18 +456,18 @@ class GcodeExport(inkex.Effect):
 
                             if  Laser_ON:   #DEVO evitare di uscire dalla matrice
                                 if x == w-1: #controllo fine riga
-                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n')
                                     file_gcode.write(self.options.laseroff + '\n')
                                     Laser_ON = False
 
                                 else:
                                     if matrice_BN[y][x+1] == B:
-                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
 
                                     elif matrice_BN[y][x] != matrice_BN[y][x+1]:
-                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x+1]) +'\n')
 
 
@@ -478,18 +481,18 @@ class GcodeExport(inkex.Effect):
 
                             if  Laser_ON:   #DEVO evitare di uscire dalla matrice
                                 if x == 0: #controllo fine riga ritorno
-                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +' F' + str(Feed) + '\n')
+                                    file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n')
                                     file_gcode.write(self.options.laseroff + '\n')
                                     Laser_ON = False
 
                                 else:
                                     if matrice_BN[y][x-1] == B:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
 
                                     elif  matrice_BN[y][x] != matrice_BN[y][x-1]:
-                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' F' + str(Feed) +'\n')
+                                        file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                         file_gcode.write(self.options.laseron + ' '+ ' S' + str(255 - matrice_BN[y][x-1]) +'\n')
 
 
