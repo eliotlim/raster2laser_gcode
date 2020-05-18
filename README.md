@@ -9,9 +9,9 @@
 - Remove Preview Only
 - Fix Feed rate (per min = *60)
 - Add feed rate to travel moves
-- Add power constant laser power (Sx) #TODO: variable power for grayscale
+- Add power constant laser power (Sx) #TODO: variable power for grayscale *not working
 - Consolidate Feed (=speed Fx) and Speed(=power Sx) to gcode header
-
+- Moved LASER ON / LASER OFF to begin/end file only
 
 
 ----------- ORIGINAL TEXT -----------------
