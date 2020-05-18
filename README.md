@@ -1,14 +1,17 @@
 # IMPORTANT! - Tweaked to work with Inkscape 1.x
 
 - Original work by 305engineering
-- Minor changes to make it work with inkscape 1.x
-- I have not changed/touched the original logic behind 
 
-
-
-
+## Starting to change original logic
+- No more option to pick background color (always white, which translates to a simple move - laser off)
+- New file names
+- New svg -> png conversion 
 
 # Raster 2 Laser GCode generator
+
+
+----------- ORIGINAL TEXT -----------------
+
 
 ## Descriptions
 - Raster 2 Laser GCode generator is an extension to generate Gcode for a laser cutter/engraver (or pen plotter), it can generate various type of outputs from a simple B&W (on/off) to a more detailed Grayscale (pwm)
