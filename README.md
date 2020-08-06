@@ -5,13 +5,13 @@
 ## Starting to change original logic
 - No more option to pick background color (always white, which translates to a simple move - laser off)
 - New file names
-- New svg -> png conversion 
+- New svg -> png conversion
 - Remove Preview Only
 - Fix Feed rate (per min = *60)
 - Add feed rate to travel moves
 - Add power constant laser power (Sx) #TODO: variable power for grayscale *not working
 - Consolidate Feed (=speed Fx) and Speed(=power Sx) to gcode header
-- Moved LASER ON / LASER OFF to begin/end file only
+- Make selectable to turn the LASER ON/OFF only at the beginning and end of the file, or turn it in the middle of the raster.
 
 
 ----------- ORIGINAL TEXT -----------------
