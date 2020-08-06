@@ -31,7 +31,7 @@ Simply copy all the files in the folder "Extensions" of Inkscape
 
 >Linux ) "/usr/share/inkscape/extensions"
 
->Mac ) "/Applications/Inkscape.app/Contents/Resources/extensions"
+>Mac ) "/Applications/Inkscape.app/Contents/Resources/share/inkscape/extensions"
 
 
 for unix (& mac maybe) change the permission on the file:
