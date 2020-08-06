@@ -76,7 +76,7 @@
 	<!-- Laser ON/OFF commands -->
 	<param name="laseron" type="string"  gui-text="Laser ON Command">M03</param>
 	<param name="laseroff" type="string"  gui-text="Laser OFF Command">M05</param>
-	<param name="laserminsw" type="boolean" gui-text="Laser ON/OFF at the begin/end of file only">true</param>
+	<param name="laserminsw" type="boolean" gui-text="ON/OFF only at the beginning and end of the file">true</param>
 
 	<effect needs-live-preview="false">
         <object-type>all</object-type>
