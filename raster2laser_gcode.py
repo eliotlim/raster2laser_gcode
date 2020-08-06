@@ -28,7 +28,7 @@ import os
 import re
 
 sys.path.append('/usr/share/inkscape/extensions')
-sys.path.append('/Applications/Inkscape.app/Contents/Resources/extensions')
+sys.path.append('/Applications/Inkscape.app/Contents/Resources/share/inkscape/extensions')
 
 import subprocess
 
