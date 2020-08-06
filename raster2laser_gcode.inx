@@ -60,7 +60,7 @@
 
 
 	<!-- Velocità Nero e spostamento -->
-	<param name="feed" type="int" min="1" max="5000" gui-text="Engraving speed">200</param>
+	<param name="feed" type="int" min="1" max="5000" gui-text="Engraving speed mm/s">200</param>
 	<param name="power" type="int" min="1" max="100" gui-text="Laser power %">80</param>
 
 	<!-- FLIP = coordinate Cartesiane (False) Coordinate "informatiche" (True) -->
@@ -73,8 +73,10 @@
 		<_item value="3">No Homing</_item>
 	</param>
 
+	<!-- Laser ON/OFF commands -->
 	<param name="laseron" type="string"  gui-text="Laser ON Command">M03</param>
 	<param name="laseroff" type="string"  gui-text="Laser OFF Command">M05</param>
+	<param name="laserminsw" type="boolean" gui-text="Laser ON/OFF at the begin/end of file only">true</param>
 
 	<effect needs-live-preview="false">
         <object-type>all</object-type>
