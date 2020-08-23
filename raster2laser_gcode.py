@@ -95,7 +95,7 @@ class GcodeExport(inkex.Effect):
                 for s in dir_list:
                     r = re.match("^%s_0*(\d+).*%s$"%(re.escape(temp_name), '\\.png'), s)
                     if r:
-                        max_n = max(max_n, int(r.group(1)))	
+                        max_n = max(max_n, int(r.group(1)))
                 self.options.filename = temp_name + "_" + ("0"*(4-len(str(max_n+1))) + str(max_n+1))
 
             #genero i percorsi file da usare
