@@ -162,9 +162,11 @@ class GcodeExport(inkex.Effect):
         else:
             DPI = 254
 
-        command = "inkscape -C -o \"%s\" -d %s -y 1 %s 2>/dev/null" % (pos_file_png_original, DPI, current_file) #Comando da linea di comando per esportare in PNG
-        p = subprocess.Popen(command, shell=True)
+        command = "inkscape -C -o \"%s\" -d %s -y 1 %s" % (pos_file_png_original, DPI, current_file)  #Comando da linea di comando per esportare in PNG
+
+        p = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
         p.wait()
+        p.stderr.close()
 
 
 
