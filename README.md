@@ -12,6 +12,7 @@
 - Add power constant laser power (Sx) #TODO: variable power for grayscale *not working
 - Consolidate Feed (=speed Fx) and Speed(=power Sx) to gcode header
 - Moved LASER ON / LASER OFF to begin/end file only
+- Added option to set laser max power GCode (usually 255)
 
 
 ----------- ORIGINAL TEXT -----------------

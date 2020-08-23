@@ -75,6 +75,7 @@
 
 	<param name="laseron" type="string"  gui-text="Laser ON Command">M03</param>
 	<param name="laseroff" type="string"  gui-text="Laser OFF Command">M05</param>
+	<param name="laser_max_value" type="int" min="1" max="12000" gui-text="Laser max power value">255</param>
 
 	<effect needs-live-preview="false">
         <object-type>all</object-type>
