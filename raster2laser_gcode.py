@@ -50,6 +50,7 @@ class GcodeExport(inkex.Effect):
         # Opzioni di esportazione dell'immagine
         self.arg_parser.add_argument("-d", "--directory", type=str, dest="directory", default="/home/", help="Directory for files") ####check_dir
         self.arg_parser.add_argument("-file", "--filename", type=str, dest="filename", default="-1.0", help="File name")
+        self.arg_parser.add_argument("-extension", "--extension", type=str, dest="extension", default="ngc", help="File name extension")
         self.arg_parser.add_argument("-n", "--add-numeric-suffix-to-filename", type=inkex.utils.Boolean, dest="add_numeric_suffix_to_filename", default=True, help="Add numeric suffix to filename")
         self.arg_parser.add_argument("-r", "--resolution", type=int, dest="resolution", default="5", help="") #Usare il valore su float(xy)/resolution e un case per i DPI dell export
 
@@ -84,7 +85,6 @@ class GcodeExport(inkex.Effect):
     ######## 	Richiamata da __init__()
     ########	Qui si svolge tutto
     def effect(self):
-        current_file = self.options.input_file
 
         ##Implementare check_dir
         if os.path.isdir(self.options.directory):
@@ -131,11 +131,11 @@ class GcodeExport(inkex.Effect):
             pos_file_png_original = os.path.join(self.options.directory, self.options.filename+suffix+"-orignal.png")
             pos_file_png_BW = os.path.join(self.options.directory, self.options.filename+suffix+"preview-BW.png")
             pos_file_png_GS = os.path.join(self.options.directory, self.options.filename+suffix+"preview-GS.png")
-            pos_file_gcode = os.path.join(self.options.directory, self.options.filename+suffix+"final.ngc")
+            pos_file_gcode = os.path.join(self.options.directory, self.options.filename+suffix+"final." + self.options.extension)
 
 
             #Esporto l'immagine in PNG
-            self.exportPage(pos_file_png_original, current_file)
+            self.exportPage(pos_file_png_original)
 
 
             #DA FARE
@@ -149,11 +149,11 @@ class GcodeExport(inkex.Effect):
 
     ########	ESPORTA L IMMAGINE IN PNG
     ######### 	Richiamata da effect()
-    def exportPage(self, pos_file_png_original, current_file):
+    def exportPage(self, pos_file_png_original):
         ######## CREAZIONE DEL FILE PNG ########
         #Crea l'immagine dentro la cartella indicata  da "pos_file_png_original"
         # -d 127 = risoluzione 127DPI  =>  5 pixel/mm  1pixel = 0.2mm
-        ###command="inkscape -C -e \"%s\" -b\"%s\" %s -d 127" % (pos_file_png_original,current_file)
+        ###command="inkscape -C -e \"%s\" -b\"%s\" %s -d 127" % (pos_file_png_original)
 
         if self.options.resolution == 1:
             DPI = 25
@@ -164,7 +164,7 @@ class GcodeExport(inkex.Effect):
         else:
             DPI = 254
 
-        command = "inkscape -C -o \"%s\" -d %s -y 1 %s" % (pos_file_png_original, DPI, current_file)  #Comando da linea di comando per esportare in PNG
+        command = "inkscape -C -o \"%s\" -d %s -y 1 %s" % (pos_file_png_original, DPI, self.options.input_file)  #Comando da linea di comando per esportare in PNG
 
         p = subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
         p.wait()

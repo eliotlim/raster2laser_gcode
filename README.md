@@ -14,6 +14,7 @@
 - Moved LASER ON / LASER OFF to begin/end file only
 - Added option to set laser max power GCode (usually 255)
 - Make selectable to turn the LASER ON/OFF only at the beginning and end of the file, or turn it in the middle of the raster.
+- Add option to enter file extension
 
 
 ----------- ORIGINAL TEXT -----------------
