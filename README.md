@@ -5,7 +5,7 @@
 ## Starting to change original logic
 - No more option to pick background color (always white, which translates to a simple move - laser off)
 - New file names
-- New svg -> png conversion 
+- New svg -> png conversion
 - Remove Preview Only
 - Fix Feed rate (per min = *60)
 - Add feed rate to travel moves
@@ -13,6 +13,7 @@
 - Consolidate Feed (=speed Fx) and Speed(=power Sx) to gcode header
 - Moved LASER ON / LASER OFF to begin/end file only
 - Added option to set laser max power GCode (usually 255)
+- Make selectable to turn the LASER ON/OFF only at the beginning and end of the file, or turn it in the middle of the raster.
 
 
 ----------- ORIGINAL TEXT -----------------
@@ -32,7 +33,7 @@ Simply copy all the files in the folder "Extensions" of Inkscape
 
 >Linux ) "/usr/share/inkscape/extensions"
 
->Mac ) "/Applications/Inkscape.app/Contents/Resources/extensions"
+>Mac ) "/Applications/Inkscape.app/Contents/Resources/share/inkscape/extensions"
 
 
 for unix (& mac maybe) change the permission on the file:

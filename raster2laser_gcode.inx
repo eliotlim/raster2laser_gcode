@@ -60,7 +60,7 @@
 
 
 	<!-- Velocità Nero e spostamento -->
-	<param name="feed" type="int" min="1" max="5000" gui-text="Engraving speed">200</param>
+	<param name="feed" type="int" min="1" max="5000" gui-text="Engraving speed mm/s">200</param>
 	<param name="power" type="int" min="1" max="100" gui-text="Laser power %">80</param>
 
 	<!-- FLIP = coordinate Cartesiane (False) Coordinate "informatiche" (True) -->
@@ -76,6 +76,7 @@
 	<param name="laseron" type="string"  gui-text="Laser ON Command">M03</param>
 	<param name="laseroff" type="string"  gui-text="Laser OFF Command">M05</param>
 	<param name="laser_max_value" type="int" min="1" max="12000" gui-text="Laser max power value">255</param>
+	<param name="laserminsw" type="boolean" gui-text="ON/OFF only at the beginning and end of the file">true</param>
 
 	<effect needs-live-preview="false">
         <object-type>all</object-type>
@@ -89,5 +90,3 @@
     	<command reldir="extensions" interpreter="python">raster2laser_gcode.py</command>
     </script>
 </inkscape-extension>
-
-
