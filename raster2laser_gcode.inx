@@ -79,6 +79,14 @@
 	<param name="laser_max_value" type="int" min="1" max="12000" gui-text="Laser max power value">255</param>
 	<param name="laserminsw" type="boolean" gui-text="ON/OFF only at the beginning and end of the file">true</param>
 
+	<param name="overscan_distance" type="enum" gui-text="Overscan  ">
+		<_item value="0">Disabled</_item>
+		<_item value="5">5 mm</_item>
+		<_item value="10">10 mm</_item>
+		<_item value="20">20 mm</_item>
+		<_item value="40">40 mm</_item>
+	</param>
+
 	<effect needs-live-preview="false">
         <object-type>all</object-type>
         <effects-menu>

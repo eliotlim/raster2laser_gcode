@@ -81,6 +81,11 @@ class GcodeExport(inkex.Effect):
         self.arg_parser.add_argument("-lminsw", "--laserminsw", type=inkex.utils.Boolean, dest="laserminsw", default=True, help="Minimize Laser switching")
 
         #inkex.errormsg("BLA BLA BLA Messaggio da visualizzare") #DEBUG
+        # Overscan distance (0 to disable)
+        self.arg_parser.add_argument("-overscan", "--overscan_distance", type=int, dest="overscan_distance",
+                                     default="0", help="Overscan reduces burnt edges")
+
+        # inkex.errormsg("BLA BLA BLA Messaggio da visualizzare") #DEBUG
 
     ######## 	Richiamata da __init__()
     ########	Qui si svolge tutto
@@ -409,16 +414,24 @@ class GcodeExport(inkex.Effect):
 
         #Creazione del Gcode
 
-        #allargo la matrice per lavorare su tutta l'immagine
+        # Convert overscan distance (in mm) to scanline units (px) using resolution (px/mm)
+        overscan = self.options.overscan_distance * self.options.resolution
+
+        # Enlarge `matrice` to work on the whole image
+        # allargo la matrice per lavorare su tutta l'immagine
         for y in range(h):
             matrice_BN[y].append(B)
         w = w+1
 
         if self.options.conversion_type != 6:
             for y in range(h):
+                scanline_first = True
                 if y % 2 == 0:
                     for x in range(w):
                         if matrice_BN[y][x] == N:
+                            if scanline_first:
+                                scanline_first = False
+                                file_gcode.write('G0 X' + str(float(max(0, x - overscan)) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
                                 file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
                                 if not self.options.laserminsw:
@@ -439,6 +452,9 @@ class GcodeExport(inkex.Effect):
                 else:
                     for x in reversed(range(w)):
                         if matrice_BN[y][x] == N:
+                            if scanline_first:
+                                scanline_first = False
+                                file_gcode.write('G0 X' + str(float(x + overscan) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
                                 file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + '\n') #tolto il Feed sul G00
                                 if not self.options.laserminsw:
@@ -459,9 +475,13 @@ class GcodeExport(inkex.Effect):
 
         else: ##SCALA DI GRIGI
             for y in range(h):
+                scanline_first = True
                 if y % 2 == 0:
                     for x in range(w):
                         if matrice_BN[y][x] != B:
+                            if scanline_first:
+                                scanline_first = False
+                                file_gcode.write('G0 X' + str(float(max(0, x - overscan)) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
                                 if self.options.laserminsw:
                                     file_gcode.write('G0 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) + ' S' + str(LaserMaxValue - matrice_BN[y][x]) +'\n')
@@ -495,6 +515,9 @@ class GcodeExport(inkex.Effect):
                 else:
                     for x in reversed(range(w)):
                         if matrice_BN[y][x] != B:
+                            if scanline_first:
+                                scanline_first = False
+                                file_gcode.write('G0 X' + str(float(x + overscan) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
                                 if self.options.laserminsw:
                                     file_gcode.write('G0 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) + ' S' + str(LaserMaxValue - matrice_BN[y][x]) +'\n')
