@@ -30,6 +30,7 @@ import re
 sys.path.append('/usr/share/inkscape/extensions')
 sys.path.append('/Applications/Inkscape.app/Contents/Resources/share/inkscape/extensions')
 
+import math
 import subprocess
 
 import inkex
@@ -426,10 +427,12 @@ class GcodeExport(inkex.Effect):
         if self.options.conversion_type != 6:
             for y in range(h):
                 scanline_first = True
+                scanline_last = float('nan')
                 if y % 2 == 0:
                     for x in range(w):
                         if matrice_BN[y][x] == N:
-                            if scanline_first:
+                            scanline_last = x
+                            if overscan > 0 and scanline_first:
                                 scanline_first = False
                                 file_gcode.write('G0 X' + str(float(max(0, x - overscan)) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
@@ -449,10 +452,14 @@ class GcodeExport(inkex.Effect):
                                         if not self.options.laserminsw:
                                             file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
+                    if overscan > 0 and not math.isnan(scanline_last):
+                        file_gcode.write('G0 X' + str(float(scanline_last + overscan) / Scala) + ' Y' + str(
+                            float(y) / Scala) + '\n')
                 else:
                     for x in reversed(range(w)):
                         if matrice_BN[y][x] == N:
-                            if scanline_first:
+                            scanline_last = x
+                            if overscan > 0 and scanline_first:
                                 scanline_first = False
                                 file_gcode.write('G0 X' + str(float(x + overscan) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
@@ -472,14 +479,19 @@ class GcodeExport(inkex.Effect):
                                         if not self.options.laserminsw:
                                             file_gcode.write(self.options.laseroff + '\n')
                                         Laser_ON = False
+                    if overscan > 0 and not math.isnan(scanline_last):
+                        file_gcode.write('G0 X' + str(float(max(scanline_last - overscan, 0)) / Scala) + ' Y' + str(
+                            float(y) / Scala) + '\n')
 
         else: ##SCALA DI GRIGI
             for y in range(h):
                 scanline_first = True
+                scanline_last = float('nan')
                 if y % 2 == 0:
                     for x in range(w):
                         if matrice_BN[y][x] != B:
-                            if scanline_first:
+                            scanline_last = x
+                            if overscan > 0 and scanline_first:
                                 scanline_first = False
                                 file_gcode.write('G0 X' + str(float(max(0, x - overscan)) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
@@ -510,12 +522,16 @@ class GcodeExport(inkex.Effect):
                                         else:
                                             file_gcode.write('G1 X' + str(float(x+1)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                             file_gcode.write(self.options.laseron + ' '+ ' S' + str(LaserMaxValue - matrice_BN[y][x+1]) +'\n')
+                    if not overscan > 0 and math.isnan(scanline_last):
+                        file_gcode.write('G0 X' + str(float(scanline_last + overscan) / Scala) + ' Y' + str(
+                            float(y) / Scala) + '\n')
 
 
                 else:
                     for x in reversed(range(w)):
                         if matrice_BN[y][x] != B:
-                            if scanline_first:
+                            scanline_last = x
+                            if overscan > 0 and scanline_first:
                                 scanline_first = False
                                 file_gcode.write('G0 X' + str(float(x + overscan) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
                             if not Laser_ON:
@@ -546,6 +562,8 @@ class GcodeExport(inkex.Effect):
                                         else:
                                             file_gcode.write('G1 X' + str(float(x)/Scala) + ' Y' + str(float(y)/Scala) +'\n')
                                             file_gcode.write(self.options.laseron + ' '+ ' S' + str(LaserMaxValue - matrice_BN[y][x-1]) +'\n')
+                    if overscan > 0 and not math.isnan(scanline_last):
+                        file_gcode.write('G0 X' + str(float(max(scanline_last - overscan, 0)) / Scala) + ' Y' + str(float(y) / Scala) + '\n')
 
 
 
